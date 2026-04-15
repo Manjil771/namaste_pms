@@ -127,7 +127,7 @@ class ApiService {
   // =========================
   Future<Map<String, dynamic>> getRoomStatus(int businessId) async {
     final response = await _dio.get(
-      '/dashboard/room-status/',
+      '/room-status/',
       queryParameters: {'bid': businessId},
     );
     return response.data;
@@ -135,7 +135,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getMenuStatus(int businessId) async {
     final response = await _dio.get(
-      '/dashboard/menu-status/',
+      '/menu/',
       queryParameters: {'bid': businessId},
     );
     return response.data;
@@ -143,7 +143,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getBookings(int businessId) async {
     final response = await _dio.get(
-      '/dashboard/bookings/',
+      '/booked/',
       queryParameters: {'bid': businessId},
     );
     return response.data;
@@ -151,8 +151,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getRevenue(int businessId) async {
     final response = await _dio.get(
-      '/dashboard/revenue/',
-      queryParameters: {'bid': businessId},
+      '/revenue/b$businessId/',
     );
     return response.data;
   }

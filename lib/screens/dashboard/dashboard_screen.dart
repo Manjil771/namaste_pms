@@ -21,7 +21,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDashboardData();
+    Future.microtask(() => _loadDashboardData());
   }
   
   Future<void> _loadDashboardData() async {

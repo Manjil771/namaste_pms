@@ -4,8 +4,7 @@ import 'package:nhpms/models/auth/user_model.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
 
-final authProvider =
-    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier();
 });
 
@@ -82,8 +81,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response =
-          await _apiService.login(phoneNumber, password);
+      final response = await _apiService.login(phoneNumber, password);
 
       final tokens = AuthTokens.fromJson(response['tokens']);
 
@@ -97,12 +95,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (response['user'] != null) {
         user = UserModel.fromJson(response['user']);
       } else if (response['business'] != null) {
+        final rawBusiness = response['business'];
+        final Map<String, dynamic> business =
+            rawBusiness is List ? Map<String, dynamic>.from(rawBusiness[0]) : Map<String, dynamic>.from(rawBusiness);
         user = UserModel(
-          username: response['business']['name'],
-          email: response['business']['email'] ?? '',
-          phoneNumber: response['business']['phone_number'],
-          businessId: response['business']['id'],
-          businessName: response['business']['name'],
+          username: business['business_name'] ?? '',
+          email: business['email'] ?? '',
+          phoneNumber: business['phone_number'],
+          businessId: business['business_id'],
+          businessName: business['business_name'],
         );
       }
 
@@ -115,7 +116,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Login error: $e');
+      print('Stack trace: $stackTrace');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
