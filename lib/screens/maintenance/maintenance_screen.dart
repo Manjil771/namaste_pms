@@ -31,7 +31,9 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
   Widget build(BuildContext context) {
     final maintenanceState = ref.watch(maintenanceProvider);
     
-    return Scaffold(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -56,6 +58,7 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
         onRefresh: _loadData,
         child: _buildBody(maintenanceState),
       ),
+    ),
     );
   }
   
@@ -98,63 +101,180 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.orange.withOpacity(0.2),
-              child: Icon(
-                _selectedTab == 'rooms' ? Icons.meeting_room : Icons.table_restaurant,
-                color: Colors.orange,
-              ),
-            ),
-            title: Text(
-              _selectedTab == 'rooms' 
-                  ? 'Room ${item['room_number']}' 
-                  : 'Table ${item['table_number']}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_selectedTab == 'rooms') ...[
-                  Text('Type: ${item['type_name']}'),
-                  Text('Capacity: ${item['capacity']} persons'),
-                ] else ...[
-                  Text('Capacity: ${item['capacity']} persons'),
-                ],
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    item['status_name'],
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            trailing: ElevatedButton(
-              onPressed: () => _markAvailable(item['id']),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.successColor,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              child: const Text('Mark Available'),
-            ),
-          ),
-        );
+        return _selectedTab == 'rooms'
+            ? _buildRoomCard(item)
+            : _buildTableCard(item);
       },
     );
   }
   
+  Color _statusColor(String? statusName) {
+    if (statusName == 'Cleaning') return Colors.blue;
+    return Colors.orange; // Maintenance
+  }
+
+  Widget _buildRoomCard(Map<String, dynamic> item) {
+    final color = _statusColor(item['status_name'] as String?);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: color.withOpacity(0.15),
+                      child: Icon(Icons.meeting_room, color: color),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Room ${item['room_number']}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          item['type_name'] ?? '',
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    item['status_name'] ?? '',
+                    style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _infoChip(Icons.people_outline,
+                    '${item['capacity']} persons'),
+                const SizedBox(width: 16),
+                _infoChip(Icons.currency_rupee,
+                    '₹${item['price']} / night'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline, size: 18),
+                label: const Text('Mark as Available'),
+                onPressed: () => _markAvailable(item['id'] as int),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.successColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCard(Map<String, dynamic> item) {
+    final color = _statusColor(item['status_name'] as String?);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: color.withOpacity(0.15),
+                      child: Icon(Icons.table_restaurant, color: color),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Table ${item['table_number']}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    item['status_name'] ?? '',
+                    style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            _infoChip(Icons.people_outline, '${item['capacity']} persons'),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline, size: 18),
+                label: const Text('Mark as Available'),
+                onPressed: () => _markAvailable(item['id'] as int),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.successColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoChip(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(label,
+            style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+      ],
+    );
+  }
+
   Future<void> _markAvailable(int id) async {
     final businessId = ref.read(authProvider).user?.businessId ?? 1;
     final success = await ref.read(maintenanceProvider.notifier).markUnitAvailable(

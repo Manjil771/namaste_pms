@@ -59,53 +59,73 @@ class ApiService {
         InterceptorsWrapper(
           onRequest: (options, handler) {
             debugPrint('');
-            debugPrint('╔══ REQUEST ══════════════════════════════════════════');
+            debugPrint(
+                '╔══ REQUEST ══════════════════════════════════════════');
             debugPrint('║  ${options.method}  ${options.uri}');
-            debugPrint('╠── HEADERS ──────────────────────────────────────────');
+            debugPrint(
+                '╠── HEADERS ──────────────────────────────────────────');
             options.headers.forEach((k, v) {
               // Mask the token value for safety, just show it's present
-              final display = k == 'Authorization' ? '${(v as String).substring(0, 15)}…' : v;
+              final display = k == 'Authorization'
+                  ? '${(v as String).substring(0, 15)}…'
+                  : v;
               debugPrint('║  $k: $display');
             });
             if (options.queryParameters.isNotEmpty) {
-              debugPrint('╠── QUERY PARAMS ─────────────────────────────────────');
-              options.queryParameters.forEach((k, v) => debugPrint('║  $k: $v'));
+              debugPrint(
+                  '╠── QUERY PARAMS ─────────────────────────────────────');
+              options.queryParameters
+                  .forEach((k, v) => debugPrint('║  $k: $v'));
             }
             if (options.data != null) {
-              debugPrint('╠── BODY ─────────────────────────────────────────────');
+              debugPrint(
+                  '╠── BODY ─────────────────────────────────────────────');
               debugPrint('║  ${options.data}');
             }
-            debugPrint('╚═════════════════════════════════════════════════════');
+            debugPrint(
+                '╚═════════════════════════════════════════════════════');
             handler.next(options);
           },
           onResponse: (response, handler) {
             debugPrint('');
-            debugPrint('╔══ RESPONSE ═════════════════════════════════════════');
-            debugPrint('║  ${response.statusCode}  ${response.requestOptions.method}  ${response.requestOptions.path}');
-            debugPrint('╠── DATA ─────────────────────────────────────────────');
+            debugPrint(
+                '╔══ RESPONSE ═════════════════════════════════════════');
+            debugPrint(
+                '║  ${response.statusCode}  ${response.requestOptions.method}  ${response.requestOptions.path}');
+            debugPrint(
+                '╠── DATA ─────────────────────────────────────────────');
             debugPrint('║  ${response.data}');
-            debugPrint('╚═════════════════════════════════════════════════════');
+            debugPrint(
+                '╚═════════════════════════════════════════════════════');
             handler.next(response);
           },
           onError: (error, handler) {
             debugPrint('');
-            debugPrint('╔══ ERROR ════════════════════════════════════════════');
-            debugPrint('║  ${error.response?.statusCode}  ${error.requestOptions.method}  ${error.requestOptions.path}');
+            debugPrint(
+                '╔══ ERROR ════════════════════════════════════════════');
+            debugPrint(
+                '║  ${error.response?.statusCode}  ${error.requestOptions.method}  ${error.requestOptions.path}');
             if (error.requestOptions.queryParameters.isNotEmpty) {
-              debugPrint('╠── QUERY PARAMS ─────────────────────────────────────');
-              error.requestOptions.queryParameters.forEach((k, v) => debugPrint('║  $k: $v'));
+              debugPrint(
+                  '╠── QUERY PARAMS ─────────────────────────────────────');
+              error.requestOptions.queryParameters
+                  .forEach((k, v) => debugPrint('║  $k: $v'));
             }
             if (error.requestOptions.data != null) {
-              debugPrint('╠── REQUEST BODY ─────────────────────────────────────');
+              debugPrint(
+                  '╠── REQUEST BODY ─────────────────────────────────────');
               debugPrint('║  ${error.requestOptions.data}');
             }
-            debugPrint('╠── ERROR ────────────────────────────────────────────');
+            debugPrint(
+                '╠── ERROR ────────────────────────────────────────────');
             debugPrint('║  ${error.message}');
             if (error.response?.data != null) {
-              debugPrint('╠── RESPONSE BODY ────────────────────────────────────');
+              debugPrint(
+                  '╠── RESPONSE BODY ────────────────────────────────────');
               debugPrint('║  ${error.response?.data}');
             }
-            debugPrint('╚═════════════════════════════════════════════════════');
+            debugPrint(
+                '╚═════════════════════════════════════════════════════');
             handler.next(error);
           },
         ),
@@ -336,9 +356,26 @@ class ApiService {
     await _dio.delete('/rooms/$roomId/');
   }
 
-  Future<dynamic> getMaintenanceUnits(int businessId) async {}
+  Future<Map<String, dynamic>> getMaintenanceUnits(int businessId) async {
+    final response = await _dio.get(
+      '/maintenance/',
+      queryParameters: {'bid': businessId},
+    );
+    return response.data;
+  }
 
-  Future<void> markUnitAvailable(String type, int id, int businessId) async {}
+  Future<Map<String, dynamic>> markUnitAvailable(
+      String type, int id, int businessId) async {
+    final response = await _dio.put(
+      '/maintenance/',
+      data: {
+        'type': type,
+        'id': id,
+        'business_id': businessId,
+      },
+    );
+    return response.data;
+  }
 
   Future<void> deleteBooking(int businessId, int bookingId) async {}
 
