@@ -11,50 +11,53 @@ class StaffState {
   final List<StaffModel> staff;
   final bool isLoading;
   final String? error;
-  
+
   StaffState({
     this.staff = const [],
     this.isLoading = false,
     this.error,
   });
-  
+
   StaffState copyWith({
     List<StaffModel>? staff,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return StaffState(
       staff: staff ?? this.staff,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
 class StaffNotifier extends StateNotifier<StaffState> {
   StaffNotifier() : super(StaffState());
-  
+
   final _apiService = ApiService();
-  
+
   Future<void> fetchStaff(int businessId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getStaff(businessId);
-      final staff = (response as List).map((json) => StaffModel.fromJson(json)).toList();
-      state = state.copyWith(staff: staff, isLoading: false);
+      final list = response as List? ?? [];
+      final staff = list.map((json) => StaffModel.fromJson(json as Map<String, dynamic>)).toList();
+      state = state.copyWith(staff: staff, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
+
   Future<bool> createStaff(int businessId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.createStaff(businessId, data);
-      final newStaff = StaffModel.fromJson(response['staff']);
+      final newStaff = StaffModel.fromJson(response['staff'] as Map<String, dynamic>);
       state = state.copyWith(
         staff: [newStaff, ...state.staff],
         isLoading: false,
+        clearError: true,
       );
       return true;
     } catch (e) {
@@ -62,27 +65,29 @@ class StaffNotifier extends StateNotifier<StaffState> {
       return false;
     }
   }
-  
-  Future<bool> updateStaff(int businessId, int staffId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true);
+
+  Future<bool> updateStaff(
+      int businessId, int staffId, Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.updateStaff(businessId, staffId, data);
-      final updatedStaff = StaffModel.fromJson(response['staff']);
-      final updatedStaffList = state.staff.map((s) => s.id == staffId ? updatedStaff : s).toList();
-      state = state.copyWith(staff: updatedStaffList, isLoading: false);
+      final updatedStaff = StaffModel.fromJson(response['staff'] as Map<String, dynamic>);
+      final updatedStaffList =
+          state.staff.map((s) => s.id == staffId ? updatedStaff : s).toList();
+      state = state.copyWith(staff: updatedStaffList, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
   }
-  
+
   Future<bool> deleteStaff(int businessId, int staffId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _apiService.deleteStaff(businessId, staffId);
       final updatedStaff = state.staff.where((s) => s.id != staffId).toList();
-      state = state.copyWith(staff: updatedStaff, isLoading: false);
+      state = state.copyWith(staff: updatedStaff, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -92,7 +97,8 @@ class StaffNotifier extends StateNotifier<StaffState> {
 }
 
 // Lookup Provider for Staff
-final staffLookupProvider = StateNotifierProvider<StaffLookupNotifier, StaffLookupState>((ref) {
+final staffLookupProvider =
+    StateNotifierProvider<StaffLookupNotifier, StaffLookupState>((ref) {
   return StaffLookupNotifier();
 });
 
@@ -101,7 +107,7 @@ class StaffLookupState {
   final List<Map<String, dynamic>> shifts;
   final List<Map<String, dynamic>> staffStatuses;
   final bool isLoading;
-  
+
   StaffLookupState({
     this.roles = const [],
     this.shifts = const [],
@@ -110,7 +116,7 @@ class StaffLookupState {
   });
 
   get error => null;
-  
+
   StaffLookupState copyWith({
     List<Map<String, dynamic>>? roles,
     List<Map<String, dynamic>>? shifts,
@@ -128,7 +134,7 @@ class StaffLookupState {
 
 class StaffLookupNotifier extends StateNotifier<StaffLookupState> {
   StaffLookupNotifier() : super(StaffLookupState());
-  
+
   Future<void> fetchLookupData() async {
     state = state.copyWith(isLoading: true);
     // Mock data - replace with actual API calls

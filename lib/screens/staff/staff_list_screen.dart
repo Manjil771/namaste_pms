@@ -4,7 +4,7 @@ import '../../providers/staff_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/empty_state_widget.dart';
-import '../../config/theme.dart';
+// import '../../config/theme.dart';
 
 class StaffListScreen extends ConsumerStatefulWidget {
   const StaffListScreen({super.key});
@@ -17,18 +17,19 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadStaff();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadStaff());
   }
-  
+
   Future<void> _loadStaff() async {
     final businessId = ref.read(authProvider).user?.businessId ?? 1;
+
     await ref.read(staffProvider.notifier).fetchStaff(businessId);
   }
 
   @override
   Widget build(BuildContext context) {
     final staffState = ref.watch(staffProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Staff Management'),
@@ -47,12 +48,12 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       ),
     );
   }
-  
+
   Widget _buildBody(StaffState state) {
     if (state.isLoading) {
       return const LoadingWidget();
     }
-    
+
     if (state.error != null) {
       return Center(
         child: Column(
@@ -70,7 +71,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
         ),
       );
     }
-    
+
     if (state.staff.isEmpty) {
       return EmptyStateWidget(
         icon: Icons.people_outline,
@@ -82,7 +83,7 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
         },
       );
     }
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: state.staff.length,
@@ -140,31 +141,43 @@ class _StaffListScreenState extends ConsumerState<StaffListScreen> {
       },
     );
   }
-  
+
   Color _getRoleColor(int roleId) {
     switch (roleId) {
-      case 1: return Colors.purple;
-      case 2: return Colors.blue;
-      case 3: return Colors.green;
-      default: return Colors.grey;
+      case 1:
+        return Colors.purple;
+      case 2:
+        return Colors.blue;
+      case 3:
+        return Colors.green;
+      default:
+        return Colors.grey;
     }
   }
-  
+
   IconData _getRoleIcon(int roleId) {
     switch (roleId) {
-      case 1: return Icons.manage_accounts;
-      case 2: return Icons.support_agent;
-      case 3: return Icons.cleaning_services;
-      default: return Icons.person;
+      case 1:
+        return Icons.manage_accounts;
+      case 2:
+        return Icons.support_agent;
+      case 3:
+        return Icons.cleaning_services;
+      default:
+        return Icons.person;
     }
   }
-  
+
   Color _getStatusColor(int statusId) {
     switch (statusId) {
-      case 1: return Colors.green;
-      case 2: return Colors.orange;
-      case 3: return Colors.red;
-      default: return Colors.grey;
+      case 1:
+        return Colors.green;
+      case 2:
+        return Colors.orange;
+      case 3:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 }
