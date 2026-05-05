@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nhpms/models/room/room_model.dart';
 import '../../providers/room_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/empty_state_widget.dart';
 import '../../config/theme.dart';
@@ -24,7 +25,8 @@ class _RoomListScreenState extends ConsumerState<RoomListScreen> {
   }
   
   Future<void> _loadRooms() async {
-    await ref.read(roomProvider.notifier).fetchRooms();
+    final businessId = ref.read(authProvider).user?.businessId ?? 1;
+    await ref.read(roomProvider.notifier).fetchRooms(businessId);
   }
 
   @override

@@ -37,27 +37,28 @@ class RoomNotifier extends StateNotifier<RoomState> {
   
   final _apiService = ApiService();
   
-  Future<void> fetchRooms() async {
+  Future<void> fetchRooms(int businessId) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
-      final response = await _apiService.getRoles();
-      final rooms = (response as List).map((json) => RoomModel.fromJson(json)).toList();
-      state = state.copyWith(rooms: rooms, isLoading: false);
+      final response = await _apiService.getRooms(businessId);
+      final rooms = response.map((json) => RoomModel.fromJson(json as Map<String, dynamic>)).toList();
+      state = state.copyWith(rooms: rooms, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
-  Future<bool> createRoom(Map<String, dynamic> data) async {
+
+  Future<bool> createRoom(int businessId, Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
-      final response = await _apiService.createRoom(data);
-      final newRoom = RoomModel.fromJson(response['room']);
+      final response = await _apiService.createRoom(businessId, data);
+      final newRoom = RoomModel.fromJson(response['room'] as Map<String, dynamic>);
       state = state.copyWith(
         rooms: [...state.rooms, newRoom],
         isLoading: false,
+        clearError: true,
       );
       return true;
     } catch (e) {
@@ -65,33 +66,33 @@ class RoomNotifier extends StateNotifier<RoomState> {
       return false;
     }
   }
-  
-  Future<bool> updateRoom(int roomId, Map<String, dynamic> data) async {
+
+  Future<bool> updateRoom(int businessId, int roomId, Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
-      final response = await _apiService.updateRoom(roomId, data);
-      final updatedRoom = RoomModel.fromJson(response['room']);
-      
+      final response = await _apiService.updateRoom(businessId, roomId, data);
+      final updatedRoom = RoomModel.fromJson(response['room'] as Map<String, dynamic>);
+
       final updatedRooms = state.rooms.map((room) {
         return room.id == roomId ? updatedRoom : room;
       }).toList();
-      
-      state = state.copyWith(rooms: updatedRooms, isLoading: false);
+
+      state = state.copyWith(rooms: updatedRooms, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
   }
-  
-  Future<bool> deleteRoom(int roomId) async {
+
+  Future<bool> deleteRoom(int businessId, int roomId) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
-      await _apiService.deleteRoom(roomId);
+      await _apiService.deleteRoom(businessId, roomId);
       final updatedRooms = state.rooms.where((room) => room.id != roomId).toList();
-      state = state.copyWith(rooms: updatedRooms, isLoading: false);
+      state = state.copyWith(rooms: updatedRooms, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

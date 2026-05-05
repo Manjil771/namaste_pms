@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/constants.dart';
 
@@ -15,14 +16,12 @@ class ApiService {
 
   Dio get dio => _dio;
 
-
   void _init() {
     _dio = Dio(BaseOptions(
       baseUrl: AppConstants.baseUrl,
       connectTimeout:
           const Duration(milliseconds: AppConstants.connectionTimeout),
-      receiveTimeout:
-          const Duration(milliseconds: AppConstants.receiveTimeout),
+      receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -32,8 +31,7 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token =
-              await _storage.read(key: AppConstants.accessTokenKey);
+          final token = await _storage.read(key: AppConstants.accessTokenKey);
 
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -55,8 +53,65 @@ class ApiService {
         },
       ),
     );
-  }
 
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            debugPrint('');
+            debugPrint('╔══ REQUEST ══════════════════════════════════════════');
+            debugPrint('║  ${options.method}  ${options.uri}');
+            debugPrint('╠── HEADERS ──────────────────────────────────────────');
+            options.headers.forEach((k, v) {
+              // Mask the token value for safety, just show it's present
+              final display = k == 'Authorization' ? '${(v as String).substring(0, 15)}…' : v;
+              debugPrint('║  $k: $display');
+            });
+            if (options.queryParameters.isNotEmpty) {
+              debugPrint('╠── QUERY PARAMS ─────────────────────────────────────');
+              options.queryParameters.forEach((k, v) => debugPrint('║  $k: $v'));
+            }
+            if (options.data != null) {
+              debugPrint('╠── BODY ─────────────────────────────────────────────');
+              debugPrint('║  ${options.data}');
+            }
+            debugPrint('╚═════════════════════════════════════════════════════');
+            handler.next(options);
+          },
+          onResponse: (response, handler) {
+            debugPrint('');
+            debugPrint('╔══ RESPONSE ═════════════════════════════════════════');
+            debugPrint('║  ${response.statusCode}  ${response.requestOptions.method}  ${response.requestOptions.path}');
+            debugPrint('╠── DATA ─────────────────────────────────────────────');
+            debugPrint('║  ${response.data}');
+            debugPrint('╚═════════════════════════════════════════════════════');
+            handler.next(response);
+          },
+          onError: (error, handler) {
+            debugPrint('');
+            debugPrint('╔══ ERROR ════════════════════════════════════════════');
+            debugPrint('║  ${error.response?.statusCode}  ${error.requestOptions.method}  ${error.requestOptions.path}');
+            if (error.requestOptions.queryParameters.isNotEmpty) {
+              debugPrint('╠── QUERY PARAMS ─────────────────────────────────────');
+              error.requestOptions.queryParameters.forEach((k, v) => debugPrint('║  $k: $v'));
+            }
+            if (error.requestOptions.data != null) {
+              debugPrint('╠── REQUEST BODY ─────────────────────────────────────');
+              debugPrint('║  ${error.requestOptions.data}');
+            }
+            debugPrint('╠── ERROR ────────────────────────────────────────────');
+            debugPrint('║  ${error.message}');
+            if (error.response?.data != null) {
+              debugPrint('╠── RESPONSE BODY ────────────────────────────────────');
+              debugPrint('║  ${error.response?.data}');
+            }
+            debugPrint('╚═════════════════════════════════════════════════════');
+            handler.next(error);
+          },
+        ),
+      );
+    }
+  }
 
   Future<Map<String, dynamic>> login(
       String phoneNumber, String password) async {
@@ -88,8 +143,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> createStaff(
       int businessId, Map<String, dynamic> data) async {
-    final response =
-        await _dio.post('/staff/b$businessId/', data: data);
+    final response = await _dio.post('/staff/b$businessId/', data: data);
     return response.data;
   }
 
@@ -205,8 +259,7 @@ class ApiService {
   // RETRY REQUEST
   // =========================
   Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
-    final newToken =
-        await _storage.read(key: AppConstants.accessTokenKey);
+    final newToken = await _storage.read(key: AppConstants.accessTokenKey);
 
     final options = Options(
       method: requestOptions.method,
@@ -223,7 +276,6 @@ class ApiService {
       options: options,
     );
   }
-
 
   Future<dynamic> getPayments() async {
     throw UnimplementedError();
@@ -258,15 +310,31 @@ class ApiService {
 
   Future<dynamic> createFoodItem(Map<String, dynamic> data) async {}
 
-  Future<dynamic> createOrder(int businessId, Map<String, dynamic> data) async {}
+  Future<dynamic> createOrder(
+      int businessId, Map<String, dynamic> data) async {}
 
   Future<dynamic> getOrders(int? tableId) async {}
 
-  Future<dynamic> createRoom(Map<String, dynamic> data) async {}
+  Future<List<dynamic>> getRooms(int businessId) async {
+    final response = await _dio.get('/rooms');
+    return response.data as List;
+  }
 
-  Future<dynamic> updateRoom(int roomId, Map<String, dynamic> data) async {}
+  Future<Map<String, dynamic>> createRoom(
+      int businessId, Map<String, dynamic> data) async {
+    final response = await _dio.post('/rooms/', data: data);
+    return response.data;
+  }
 
-  Future<void> deleteRoom(int roomId) async {}
+  Future<Map<String, dynamic>> updateRoom(
+      int businessId, int roomId, Map<String, dynamic> data) async {
+    final response = await _dio.put('/rooms/$roomId/', data: data);
+    return response.data;
+  }
+
+  Future<void> deleteRoom(int businessId, int roomId) async {
+    await _dio.delete('/rooms/$roomId/');
+  }
 
   Future<dynamic> getMaintenanceUnits(int businessId) async {}
 
@@ -274,7 +342,9 @@ class ApiService {
 
   Future<void> deleteBooking(int businessId, int bookingId) async {}
 
-  Future<dynamic> createBooking(int businessId, Map<String, dynamic> data) async {}
+  Future<dynamic> createBooking(
+      int businessId, Map<String, dynamic> data) async {}
 
-  Future<dynamic> updateBooking(int businessId, int bookingId, Map<String, dynamic> data) async {}
+  Future<dynamic> updateBooking(
+      int businessId, int bookingId, Map<String, dynamic> data) async {}
 }

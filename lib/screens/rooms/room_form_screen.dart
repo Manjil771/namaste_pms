@@ -39,7 +39,8 @@ class _RoomFormScreenState extends ConsumerState<RoomFormScreen> {
   }
 
   Future<void> _loadRoomData() async {
-    await ref.read(roomProvider.notifier).fetchRooms();
+    final businessId = ref.read(authProvider).user?.businessId ?? 1;
+    await ref.read(roomProvider.notifier).fetchRooms(businessId);
     final roomState = ref.read(roomProvider);
     final room = roomState.rooms.firstWhere(
       (r) => r.id == widget.roomId,
@@ -330,11 +331,12 @@ class _RoomFormScreenState extends ConsumerState<RoomFormScreen> {
       bool success;
       if (_isEditing) {
         success = await ref.read(roomProvider.notifier).updateRoom(
+          businessId,
           widget.roomId!,
           data,
         );
       } else {
-        success = await ref.read(roomProvider.notifier).createRoom(data);
+        success = await ref.read(roomProvider.notifier).createRoom(businessId, data);
       }
 
       if (success && mounted) {

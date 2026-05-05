@@ -37,7 +37,7 @@ class _BookingFormScreenState extends ConsumerState<BookingFormScreen> {
   Future<void> _loadData() async {
     final businessId = ref.read(authProvider).user?.businessId ?? 1;
     await Future.wait([
-      ref.read(roomProvider.notifier).fetchRooms(),
+      ref.read(roomProvider.notifier).fetchRooms(businessId),
       ref.read(guestProvider.notifier).fetchGuests(),
     ]);
     
