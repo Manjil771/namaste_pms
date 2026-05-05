@@ -44,7 +44,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
     
     try {
       final response = await _apiService.getBookings(businessId);
-      final bookings = (response as List).map((json) => BookingModel.fromJson(json)).toList();
+      final bookings = response.map((json) => BookingModel.fromJson(json as Map<String, dynamic>)).toList();
       state = state.copyWith(bookings: bookings, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

@@ -195,12 +195,12 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getBookings(int businessId) async {
+  Future<List<dynamic>> getBookings(int businessId) async {
     final response = await _dio.get(
       '/booked/',
       queryParameters: {'bid': businessId},
     );
-    return response.data;
+    return response.data['booked'] as List;
   }
 
   Future<Map<String, dynamic>> getRevenue(int businessId) async {
