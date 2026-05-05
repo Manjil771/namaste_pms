@@ -21,11 +21,12 @@ class PaymentState {
     List<PaymentModel>? payments,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return PaymentState(
       payments: payments ?? this.payments,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -77,24 +78,26 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
   final _apiService = ApiService();
   
   Future<void> fetchPayments() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getPayments();
-      final payments = (response as List).map((json) => PaymentModel.fromJson(json)).toList();
-      state = state.copyWith(payments: payments, isLoading: false);
+      final list = response as List? ?? [];
+      final payments = list.map((json) => PaymentModel.fromJson(json as Map<String, dynamic>)).toList();
+      state = state.copyWith(payments: payments, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
+
   Future<bool> createPayment(Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.createPayment(data);
-      final newPayment = PaymentModel.fromJson(response['payment']);
+      final newPayment = PaymentModel.fromJson(response['payment'] as Map<String, dynamic>);
       state = state.copyWith(
         payments: [newPayment, ...state.payments],
         isLoading: false,
+        clearError: true,
       );
       return true;
     } catch (e) {
@@ -102,27 +105,27 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
       return false;
     }
   }
-  
+
   Future<bool> updatePayment(int paymentId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.updatePayment(paymentId, data);
-      final updatedPayment = PaymentModel.fromJson(response['payment']);
+      final updatedPayment = PaymentModel.fromJson(response['payment'] as Map<String, dynamic>);
       final updatedPayments = state.payments.map((p) => p.id == paymentId ? updatedPayment : p).toList();
-      state = state.copyWith(payments: updatedPayments, isLoading: false);
+      state = state.copyWith(payments: updatedPayments, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
   }
-  
+
   Future<bool> deletePayment(int paymentId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _apiService.deletePayment(paymentId);
       final updatedPayments = state.payments.where((p) => p.id != paymentId).toList();
-      state = state.copyWith(payments: updatedPayments, isLoading: false);
+      state = state.copyWith(payments: updatedPayments, isLoading: false, clearError: true);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

@@ -20,7 +20,7 @@ class _RoomListScreenState extends ConsumerState<RoomListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadRooms();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRooms());
   }
   
   Future<void> _loadRooms() async {
@@ -34,6 +34,12 @@ class _RoomListScreenState extends ConsumerState<RoomListScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Room Management'),
         actions: [
           IconButton(

@@ -16,7 +16,7 @@ class _GuestListScreenState extends ConsumerState<GuestListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGuests();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGuests());
   }
   
   Future<void> _loadGuests() async {
@@ -29,6 +29,12 @@ class _GuestListScreenState extends ConsumerState<GuestListScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Guest Management'),
         actions: [
           IconButton(

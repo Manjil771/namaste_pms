@@ -10,46 +10,49 @@ class DrawerWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    
+
     return Drawer(
       child: Column(
         children: [
           // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          SafeArea(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.business,
+                        size: 40, color: AppTheme.primaryColor),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    user?.businessName ?? 'Hotel PMS',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user?.username ?? 'User',
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.business, size: 40, color: AppTheme.primaryColor),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  user?.businessName ?? 'Hotel PMS',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  user?.username ?? 'User',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-              ],
-            ),
           ),
-          
+
           // Menu Items
           Expanded(
             child: ListView(
@@ -129,7 +132,7 @@ class DrawerWidget extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildDrawerItem({
     required IconData icon,
     required String title,
@@ -143,12 +146,12 @@ class DrawerWidget extends ConsumerWidget {
       hoverColor: AppTheme.primaryColor.withOpacity(0.1),
     );
   }
-  
+
   void _navigateAndClose(BuildContext context, String route) {
     Navigator.pop(context);
     Navigator.pushReplacementNamed(context, route);
   }
-  
+
   Future<void> _logout(WidgetRef ref, BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -168,7 +171,7 @@ class DrawerWidget extends ConsumerWidget {
         ],
       ),
     );
-    
+
     if (confirmed == true) {
       await ref.read(authProvider.notifier).logout();
       if (context.mounted) {

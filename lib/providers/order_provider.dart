@@ -21,11 +21,12 @@ class OrderState {
     List<OrderModel>? orders,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return OrderState(
       orders: orders ?? this.orders,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -139,24 +140,26 @@ class OrderNotifier extends StateNotifier<OrderState> {
   final _apiService = ApiService();
   
   Future<void> fetchOrders([int? tableId]) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getOrders(tableId);
-      final orders = (response as List).map((json) => OrderModel.fromJson(json)).toList();
-      state = state.copyWith(orders: orders, isLoading: false);
+      final list = response as List? ?? [];
+      final orders = list.map((json) => OrderModel.fromJson(json as Map<String, dynamic>)).toList();
+      state = state.copyWith(orders: orders, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
+
   Future<bool> createOrder(int businessId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.createOrder(businessId, data);
-      final newOrder = OrderModel.fromJson(response['order']);
+      final newOrder = OrderModel.fromJson(response['order'] as Map<String, dynamic>);
       state = state.copyWith(
         orders: [newOrder, ...state.orders],
         isLoading: false,
+        clearError: true,
       );
       return true;
     } catch (e) {

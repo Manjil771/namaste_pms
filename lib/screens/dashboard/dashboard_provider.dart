@@ -206,11 +206,12 @@ class RevenueState {
     Map<String, dynamic>? revenueData,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return RevenueState(
       revenueData: revenueData ?? this.revenueData,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -221,10 +222,10 @@ class RevenueNotifier extends StateNotifier<RevenueState> {
   final _apiService = ApiService();
   
   Future<void> fetchRevenue(int businessId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getRevenue(businessId);
-      state = state.copyWith(revenueData: response, isLoading: false);
+      state = state.copyWith(revenueData: response, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

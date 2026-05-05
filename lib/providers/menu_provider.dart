@@ -24,12 +24,13 @@ class MenuState {
     List<FoodItemModel>? foodItems,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return MenuState(
       categories: categories ?? this.categories,
       foodItems: foodItems ?? this.foodItems,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -107,55 +108,58 @@ class MenuNotifier extends StateNotifier<MenuState> {
   final _apiService = ApiService();
   
   Future<void> fetchCategories() async {
-    // Business ID should come from auth state
     const businessId = 1;
+    state = state.copyWith(clearError: true);
     try {
       final response = await _apiService.getCategories(businessId);
-      final categories = (response as List).map((json) => CategoryModel.fromJson(json)).toList();
+      final list = response as List? ?? [];
+      final categories = list.map((json) => CategoryModel.fromJson(json as Map<String, dynamic>)).toList();
       state = state.copyWith(categories: categories);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
-  
+
   Future<void> fetchFoodItems() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getFoodItems();
-      final items = (response as List).map((json) => FoodItemModel.fromJson(json)).toList();
-      state = state.copyWith(foodItems: items, isLoading: false);
+      final list = response as List? ?? [];
+      final items = list.map((json) => FoodItemModel.fromJson(json as Map<String, dynamic>)).toList();
+      state = state.copyWith(foodItems: items, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
-  Future<bool> updateFoodItem(int id, Map<String, dynamic> data) async {
-  state = state.copyWith(isLoading: true);
-  try {
-    final response = await _apiService.updateFoodItem(id, data);
-    final updatedItem = FoodItemModel.fromJson(response);
-    final updatedItems = state.foodItems.map((item) {
-      return item.id == id ? updatedItem : item;
-    }).toList();
-    state = state.copyWith(foodItems: updatedItems, isLoading: false);
-    return true;
-  } catch (e) {
-    state = state.copyWith(isLoading: false, error: e.toString());
-    return false;
-  }
-}
 
-Future<bool> createFoodItem(Map<String, dynamic> data) async {
-  state = state.copyWith(isLoading: true);
-  try {
-    final response = await _apiService.createFoodItem(data);
-    final newItem = FoodItemModel.fromJson(response);
-    final updatedItems = [...state.foodItems, newItem];
-    state = state.copyWith(foodItems: updatedItems, isLoading: false);
-    return true;
-  } catch (e) {
-    state = state.copyWith(isLoading: false, error: e.toString());
-    return false;
-  }}
+  Future<bool> updateFoodItem(int id, Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final response = await _apiService.updateFoodItem(id, data);
+      final updatedItem = FoodItemModel.fromJson(response as Map<String, dynamic>);
+      final updatedItems = state.foodItems.map((item) {
+        return item.id == id ? updatedItem : item;
+      }).toList();
+      state = state.copyWith(foodItems: updatedItems, isLoading: false, clearError: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> createFoodItem(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final response = await _apiService.createFoodItem(data);
+      final newItem = FoodItemModel.fromJson(response as Map<String, dynamic>);
+      final updatedItems = [...state.foodItems, newItem];
+      state = state.copyWith(foodItems: updatedItems, isLoading: false, clearError: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
 
   Future<dynamic> deleteFoodItem(int itemId) async {}}

@@ -21,7 +21,7 @@ class _PaymentListScreenState extends ConsumerState<PaymentListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPayments();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPayments());
   }
 
   Future<void> _loadPayments() async {
@@ -35,6 +35,12 @@ class _PaymentListScreenState extends ConsumerState<PaymentListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Payments'),
         actions: [
           IconButton(

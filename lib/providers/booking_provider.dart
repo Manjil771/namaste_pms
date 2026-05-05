@@ -22,11 +22,12 @@ class BookingState {
     List<BookingModel>? bookings,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return BookingState(
       bookings: bookings ?? this.bookings,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -39,7 +40,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
   
   Future<void> fetchBookings(int businessId) async {
     _currentBusinessId = businessId;
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.getBookings(businessId);
@@ -51,7 +52,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
   }
   
   Future<bool> createBooking(int businessId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.createBooking(businessId, data);
@@ -68,7 +69,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
   }
   
   Future<bool> updateBooking(int businessId, int bookingId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.updateBooking(businessId, bookingId, data);
@@ -87,7 +88,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
   }
   
   Future<bool> deleteBooking(int businessId, int bookingId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       await _apiService.deleteBooking(businessId, bookingId);

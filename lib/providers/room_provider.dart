@@ -22,11 +22,12 @@ class RoomState {
     List<RoomModel>? rooms,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return RoomState(
       rooms: rooms ?? this.rooms,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -37,7 +38,7 @@ class RoomNotifier extends StateNotifier<RoomState> {
   final _apiService = ApiService();
   
   Future<void> fetchRooms() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.getRoles();
@@ -49,7 +50,7 @@ class RoomNotifier extends StateNotifier<RoomState> {
   }
   
   Future<bool> createRoom(Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.createRoom(data);
@@ -66,7 +67,7 @@ class RoomNotifier extends StateNotifier<RoomState> {
   }
   
   Future<bool> updateRoom(int roomId, Map<String, dynamic> data) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       final response = await _apiService.updateRoom(roomId, data);
@@ -85,7 +86,7 @@ class RoomNotifier extends StateNotifier<RoomState> {
   }
   
   Future<bool> deleteRoom(int roomId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     try {
       await _apiService.deleteRoom(roomId);

@@ -21,7 +21,7 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
   @override
   void initState() {
     super.initState();
-    _loadRevenue();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRevenue());
   }
   
   Future<void> _loadRevenue() async {
@@ -35,6 +35,12 @@ class _RevenueScreenState extends ConsumerState<RevenueScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Revenue Report'),
         actions: [
           PopupMenuButton<String>(

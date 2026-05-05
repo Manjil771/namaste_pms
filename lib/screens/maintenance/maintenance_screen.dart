@@ -19,7 +19,7 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
   
   Future<void> _loadData() async {
@@ -33,6 +33,12 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Maintenance & Cleaning'),
         bottom: TabBar(
           tabs: const [

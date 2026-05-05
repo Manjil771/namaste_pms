@@ -24,12 +24,13 @@ class MaintenanceState {
     List<Map<String, dynamic>>? tables,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return MaintenanceState(
       rooms: rooms ?? this.rooms,
       tables: tables ?? this.tables,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -40,30 +41,31 @@ class MaintenanceNotifier extends StateNotifier<MaintenanceState> {
   final _apiService = ApiService();
   
   Future<void> fetchMaintenanceUnits(int businessId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       final response = await _apiService.getMaintenanceUnits(businessId);
       state = state.copyWith(
-        rooms: List<Map<String, dynamic>>.from(response['rooms']),
-        tables: List<Map<String, dynamic>>.from(response['tables']),
+        rooms: List<Map<String, dynamic>>.from(response['rooms'] ?? []),
+        tables: List<Map<String, dynamic>>.from(response['tables'] ?? []),
         isLoading: false,
+        clearError: true,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-  
+
   Future<bool> markUnitAvailable(String type, int id, int businessId) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _apiService.markUnitAvailable(type, id, businessId);
       
       if (type == 'room') {
         final updatedRooms = state.rooms.where((r) => r['id'] != id).toList();
-        state = state.copyWith(rooms: updatedRooms, isLoading: false);
+        state = state.copyWith(rooms: updatedRooms, isLoading: false, clearError: true);
       } else {
         final updatedTables = state.tables.where((t) => t['id'] != id).toList();
-        state = state.copyWith(tables: updatedTables, isLoading: false);
+        state = state.copyWith(tables: updatedTables, isLoading: false, clearError: true);
       }
       return true;
     } catch (e) {

@@ -19,7 +19,7 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
   
   Future<void> _loadData() async {
@@ -36,6 +36,12 @@ class _MenuListScreenState extends ConsumerState<MenuListScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Menu Management'),
         actions: [
           IconButton(

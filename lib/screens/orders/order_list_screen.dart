@@ -18,7 +18,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadOrders();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadOrders());
   }
   
   Future<void> _loadOrders() async {
@@ -31,6 +31,12 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Orders'),
         actions: [
           IconButton(

@@ -22,7 +22,7 @@ class _BookingListScreenState extends ConsumerState<BookingListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadBookings();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadBookings());
   }
   
   Future<void> _loadBookings() async {
@@ -37,6 +37,12 @@ class _BookingListScreenState extends ConsumerState<BookingListScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+        ),
         title: const Text('Bookings'),
         actions: [
           IconButton(
