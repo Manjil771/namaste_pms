@@ -7,7 +7,7 @@ class EmptyStateWidget extends StatelessWidget {
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
-  
+
   const EmptyStateWidget({
     super.key,
     required this.icon,
@@ -49,7 +49,8 @@ class EmptyStateWidget extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                 ),
-                child: Text(actionLabel!),
+                child: Text(actionLabel!,
+                    style: const TextStyle(color: Colors.white)),
               ),
             ],
           ],
