@@ -16,11 +16,10 @@ final businessTypeProvider = StateNotifierProvider<BusinessTypeNotifier, List<Ma
 class BusinessTypeNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   BusinessTypeNotifier() : super([]);
   
-  final _apiService = ApiService();
+  final apiService = ApiService();
   
   Future<void> fetchBusinessTypes() async {
-    // TODO: Implement API call to get business types
-    // For now, return mock data
+   
     state = [
       {'id': 1, 'name': 'Hotel'},
       {'id': 2, 'name': 'Restaurant'},

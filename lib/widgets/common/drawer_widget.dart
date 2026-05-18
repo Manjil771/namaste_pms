@@ -79,16 +79,17 @@ class DrawerWidget extends ConsumerWidget {
                   title: 'Room Management',
                   onTap: () => _navigateAndClose(context, '/rooms'),
                 ),
-                _buildDrawerItem(
-                  icon: Icons.book_online,
-                  title: 'Bookings',
-                  onTap: () => _navigateAndClose(context, '/bookings'),
-                ),
+              
                 const Divider(),
                 _buildDrawerItem(
                   icon: Icons.restaurant_menu,
                   title: 'Menu Management',
                   onTap: () => _navigateAndClose(context, '/menu'),
+                ),
+                 _buildDrawerItem(
+                  icon: Icons.table_restaurant,
+                  title: 'Table Management',
+                  onTap: () => _navigateAndClose(context, '/tables'),
                 ),
                 _buildDrawerItem(
                   icon: Icons.receipt,

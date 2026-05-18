@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nhpms/screens/tables/table_form.dart';
+import 'package:nhpms/screens/tables/tables_listscreen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -23,41 +25,47 @@ class AppRoutes {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String dashboard = '/dashboard';
-  
+
   // Staff
   static const String staffList = '/staff';
   static const String staffForm = '/staff/form';
-  
+
   // Guests
   static const String guestList = '/guests';
   static const String guestForm = '/guests/form';
-  
+
   // Rooms
   static const String roomList = '/rooms';
   static const String roomForm = '/rooms/form';
-  
+
   // Bookings
   static const String bookingList = '/bookings';
   static const String bookingForm = '/bookings/form';
-  
+
   // Orders
   static const String orderList = '/orders';
   static const String orderDetail = '/orders/detail';
+  static const String orderForm = '/orders/form';
+
+  // Tables  ← NEW
+  static const String tableList = '/tables';
+  static const String tableForm = '/tables/form';
   
+
   // Menu
   static const String menuList = '/menu';
   static const String menuForm = '/menu/form';
-  
+
   // Payments
   static const String paymentList = '/payments';
   static const String paymentForm = '/payments/form';
-  
+
   // Maintenance
   static const String maintenance = '/maintenance';
-  
+
   // Reports
   static const String revenue = '/reports/revenue';
-  
+
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case login:
@@ -101,6 +109,16 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => OrderDetailScreen(orderId: args['id']),
         );
+
+      // Tables ← NEW
+      case tableList:
+        return MaterialPageRoute(builder: (_) => const TableListScreen());
+      case tableForm:
+        final args = settings.arguments as Map?;
+        return MaterialPageRoute(
+          builder: (_) => TableFormScreen(tableId: args?['id']),
+        );
+
       case menuList:
         return MaterialPageRoute(builder: (_) => const MenuListScreen());
       case menuForm:

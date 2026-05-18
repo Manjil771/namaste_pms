@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:nhpms/screens/dashboard/dashboard_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/dashboard_provider.dart';
 import '../../widgets/common/drawer_widget.dart';
 import '../../widgets/cards/stats_card.dart';
 import '../../config/theme.dart';

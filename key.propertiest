@@ -1,0 +1,5 @@
+
+storePassword=Manjil@123
+keyPassword=Manjil@123
+keyAlias=nhpms-key
+storeFile=app/nhpms-release.jks

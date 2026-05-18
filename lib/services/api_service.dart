@@ -160,6 +160,20 @@ class ApiService {
     final response = await _dio.get('/staff/b$businessId/');
     return response.data['staff'];
   }
+  Future<List<dynamic>> getTables(int businessId) async {
+    // GET /api/table/b{business_id}/
+    final response = await _dio.get('/table/b$businessId/');
+    return response.data as List;
+  }
+ 
+  Future<Map<String, dynamic>> createTable(
+      int businessId, Map<String, dynamic> data) async {
+    // POST /api/table/b{business_id}/
+    // Required: table_number, seat, location_name, status_id
+    final response = await _dio.post('/table/b$businessId/', data: data);
+    return response.data;
+  }
+ 
 
   Future<Map<String, dynamic>> createStaff(
       int businessId, Map<String, dynamic> data) async {
@@ -195,6 +209,7 @@ class ApiService {
 
     return response.data;
   }
+  
 
   // =========================
   // DASHBOARD

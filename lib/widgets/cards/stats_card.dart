@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../config/theme.dart';
 
 class StatsCard extends StatelessWidget {
   final String title;
